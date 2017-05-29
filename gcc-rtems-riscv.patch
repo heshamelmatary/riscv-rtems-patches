@@ -1,0 +1,57 @@
+diff -ruN gcc-7.1.0/gcc/config/riscv/rtems.h gcc-7.1.0-rtems/gcc/config/riscv/rtems.h
+--- gcc-7.1.0/gcc/config/riscv/rtems.h	1970-01-01 10:00:00.000000000 +1000
++++ gcc-7.1.0-rtems/gcc/config/riscv/rtems.h	2017-05-29 20:01:29.981939603 +1000
+@@ -0,0 +1,24 @@
++/* Definitions for RTEMS based ARM systems using EABI.
++   Copyright (C) 2011-2017 Free Software Foundation, Inc.
++ 
++   This file is part of GCC.
++ 
++   GCC is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published
++   by the Free Software Foundation; either version 3, or (at your
++   option) any later version.
++ 
++   GCC is distributed in the hope that it will be useful, but WITHOUT
++   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
++   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
++   License for more details.
++ 
++   You should have received a copy of the GNU General Public License
++   along with GCC; see the file COPYING3.  If not see
++   <http://www.gnu.org/licenses/>.  */
++
++
++#define TARGET_OS_CPP_BUILTINS() do {           \
++  builtin_define( "__rtems__" );                \
++  builtin_assert( "system=rtems" );             \
++} while (0)
+diff -ruN gcc-7.1.0/gcc/config/riscv/t-rtems gcc-7.1.0-rtems/gcc/config/riscv/t-rtems
+--- gcc-7.1.0/gcc/config/riscv/t-rtems	1970-01-01 10:00:00.000000000 +1000
++++ gcc-7.1.0-rtems/gcc/config/riscv/t-rtems	2017-05-29 18:27:16.476086251 +1000
+@@ -0,0 +1 @@
++# Custom multilibs for RTEMS
+diff -ruN gcc-7.1.0/gcc/config.gcc gcc-7.1.0-rtems/gcc/config.gcc
+--- gcc-7.1.0/gcc/config.gcc	2017-03-25 00:59:51.000000000 +1100
++++ gcc-7.1.0-rtems/gcc/config.gcc	2017-05-29 19:58:06.896100190 +1000
+@@ -2031,6 +2031,20 @@
+ 	# automatically detect that GAS supports it, yet we require it.
+ 	gcc_cv_initfini_array=yes
+ 	;;
++riscv*-*-rtems*)
++	tm_file="elfos.h newlib-stdint.h ${tm_file} riscv/elf.h riscv/rtems.h rtems.h"
++	case "x${enable_multilib}" in
++	xno) ;;
++	xyes) tmake_file="${tmake_file} riscv/t-elf-multilib" ;;
++	*) echo "Unknown value for enable_multilib"; exit 1
++	esac
++	tmake_file="${tmake_file} riscv/t-riscv riscv/t-rtems"
++	gnu_ld=yes
++	gas=yes
++	# Force .init_array support.  The configure script cannot always
++	# automatically detect that GAS supports it, yet we require it.
++	gcc_cv_initfini_array=yes
++	;;
+ riscv*-*-elf*)
+ 	tm_file="elfos.h newlib-stdint.h ${tm_file} riscv/elf.h"
+ 	case "x${enable_multilib}" in
